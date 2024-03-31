@@ -1,0 +1,53 @@
+version: 0.1
+info: |
+    The multiparameter, per-segment 
+    power consumption forecast
+    algorithm
+
+data_source:
+    data_path: [./, DATA]
+    file_name: 6000_frames_20221124+25_new.pkl
+    delimiter: ","
+
+data_re_format:
+    valid_data_range: [40001, 67000]
+    processing_columns:
+     - Timestamp
+     - Battery cell voltage
+     - ActualSpeed_L
+     - ActualSpeed_R
+     - Current segment
+     - Speed
+     - Cumulative energy consumption
+     - Momentary current consuption
+     - Momentary energy consumption
+     - Momentary power consumption
+    aggregated_columns:
+        Mass:
+         - Weight statuses - front left strain gauge weight
+         - Weight statuses - front right strain gauge weight
+         - Weight statuses - rear left strain gauge weight
+         - Weight statuses - rear right strain gauge weight
+    rename_columns:
+        Current segment: Current segment
+    index: Timestamp
+
+data_preprocessing:
+    segmentation_column: Current segment
+    ignore_segments: [0, -10]
+
+build_per_segment_statistics:
+    datetime_format: "%Y-%m-%d %H:%M:%S.%f"
+    
+segments_route_re_format:
+    valid_data_range: [200, 600]
+    processing_columns:
+     - Segment 
+     - Samples count 
+     - Duration
+     - Voltage delta
+     - Start segment voltage
+
+ann_prediction:
+    predict_steps_count: 10
+    
