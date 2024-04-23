@@ -13,14 +13,19 @@ scenario:
         data_source:
             data_path: [".", DATA]
             archive_file_name: 6000_frame.zip
-            file_name: 6000_frames_20221124+25_new.pkl
+            files_names: 
+                - 6000_frames_20221124+25_new.pkl
+            low_memory: False
+            index_col: False
             delimiter: ","
         target:
-            store_key: raw_data
+            store_keys: 
+                - raw_data
 
     - data_preparation:
         data_source:
-            store_key: raw_data
+            store_keys: 
+                - raw_data
         processing:
             valid_data_range: [40001, 67000]
             processing_columns:
@@ -44,7 +49,8 @@ scenario:
                 Current segment: Current segment
             index: Timestamp
         target:
-            store_key: preformatted_data
+            store_key: 
+                - preformatted_data
 
     - data_segmentation:
         data_source:
@@ -93,3 +99,11 @@ scenario:
     - ann_prediction:
         # predict_steps_count: 10
     
+    - data_saver:
+        data_source:
+            store_keys:
+                - None
+        target:
+            archive:
+                archive_filename: qann.zip
+
