@@ -38,7 +38,7 @@ def extract_ann_model(source_archive: ZipFile, filename:str, **ann_extract_args)
     path, _ = os.path.split(source_archive.filename); 
     source_archive.extract(filename, path);
     filepath = os.path.join(path, filename);
-    model = keras.load_model(filepath);
+    model = models.load_model(filepath);
     os.remove(filepath);
     return model;
     

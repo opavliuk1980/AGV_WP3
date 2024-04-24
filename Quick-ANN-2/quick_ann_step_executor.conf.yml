@@ -14,7 +14,7 @@ scenario:
             data_path: [".", DATA]
             archive_file_name: 6000_frame.zip
             files_names: 
-                - 6000_frames_20221124+25_new.pkl
+                - 6000_frames_20221124+25_new.csv
             low_memory: False
             index_col: False
             delimiter: ","
