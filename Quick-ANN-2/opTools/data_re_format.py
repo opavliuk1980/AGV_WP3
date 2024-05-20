@@ -9,7 +9,7 @@ def execute(
     d_from, d_to = valid_data_range if valid_data_range else [0, -1];
     columns = processing_columns if processing_columns else df.columns
     
-    df_source = df.loc[d_from:d_to, columns];
+    df_source = df.loc[:, columns].iloc[d_from:d_to, :];
     if aggregated_columns:
         for col_name, cols in aggregated_columns.items():
             df_source[col_name] = df.loc[d_from:d_to, cols].sum(axis=1);
@@ -17,7 +17,7 @@ def execute(
     if rename_columns:
         df_source.rename(columns = rename_columns, inplace = True);
         
-    df_source.index = df.loc[d_from:d_to, index] if index else df.index[d_from:d_to+1];
+    df_source.index = df[index].iloc[d_from:d_to] if index else df.index[d_from:d_to+1];
     return df_source
 
 

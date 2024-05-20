@@ -1,0 +1,124 @@
+version: 1.0
+info: |
+    The multiparameter, per-segment 
+    power consumption forecast algorithm 
+    - PART 2: FORECAST
+
+logging:
+    level: DEBUG
+    # filename: quick_ann.log    
+
+scenario:
+    - data_loader:
+          title: >
+            Load trained ANN model
+          data_source:
+            data_path: [".", DATA]
+            archive_file_name: ann_train_results.zip
+            files_names: 
+                - segments_statistics.csv
+                - min_max_scale.csv
+                - ann_model.keras
+            low_memory: False
+            index_col: False
+            delimiter: ","
+          target:
+            store_keys: df_segments_dictionary, mm_df, model
+
+    - data_loader:
+        title: >
+            Load raw input data
+        data_source:
+            data_path: [".", DATA]
+            archive_file_name: input_data_processing.zip
+            files_names: 
+                - 2_preformatted_data.csv
+            low_memory: False
+            index_col: False
+            delimiter: ","
+        target:
+            store_keys: 
+                - df_raw
+
+    - data_preparation:
+        title: Sanity data clean up
+        data_source:
+            store_keys: 
+                - df_raw
+        processing:
+            # valid_data_range: [40001, 67000]
+            processing_columns:
+                - Timestamp
+                - Battery cell voltage
+                - ActualSpeed_L
+                - ActualSpeed_R
+                - Current segment
+                - Speed
+                - Cumulative energy consumption
+                - Momentary current consuption
+                - Momentary energy consumption
+                - Momentary power consumption
+                - Mass
+            # rename_columns:
+                # Current segment: Current segment
+            index: Timestamp
+        target:
+            store_key: 
+                - df_source
+
+    - data_segmentation:
+        title: Splitering route by segments
+        data_source:
+            store_key: preformatted_data
+        processing:
+            segmentation_column: Current segment
+            ignore_segments: [0, -10]
+        target:
+            store_key: segments_historical_data
+
+    - build_per_segment_statistics:
+        data_source:
+            store_key: segments_historical_data
+        processing:
+            datetime_format: "%Y-%m-%d %H:%M:%S.%f"
+        target:
+            store_key: segments_historical_data
+
+    - segments_route_re_format:
+        processing:
+            valid_data_range: [200, 600]
+            processing_columns:
+                - Segment 
+                - Samples count 
+                - Duration
+                - Voltage delta
+                - Start segment voltage
+
+    - construct_ann:
+        processing:
+            input_parameters:
+                - Segment 
+                - Samples count 
+                - Duration
+                - Voltage delta
+                - Start segment voltage
+            static_parameters: ['Segment','Samples count','Duration','Voltage delta']
+            forecast_parameters: ['Start segment voltage']
+            input_neurons_per_parameter: 12
+            hidden_layer_neurons_per_parameter: 17
+            learn_samples_count: 350
+            forecasted_samples_count: 38
+            epochs_count: 50
+            batch_size: 15
+
+    - ann_prediction:
+        # predict_steps_count: 10
+    
+    - data_saver:
+        data_source:
+            store_keys:
+                - None
+        target:
+            archive:
+                archive_filename: qann.zip
+
